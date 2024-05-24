@@ -41,26 +41,26 @@ for i in range(num_magnets):
 
 # Add magnetic field lines
 def draw_field_line(start_point, direction, length, color=color.blue):
-    curve(pos=[start_point, start_point + length * direction], color=color)
+    arrow(pos=start_point, axis=length * direction, color=color,shaftwidth = 0.1)
 
 for i in range(num_magnets):
     angle = i * angle_between_magnets - pi/2 + angle_offset
     x = radius * cos(angle)
     y = radius * sin(angle)
     start_point = vector(x, y, 0)
-    direction = vector(cos(angle), sin(angle), 0)
-    draw_field_line(start_point, direction, 2, color=color.green)
+    direction = vector(-1, 0, 0)
+    draw_field_line(start_point, direction, 2*x, color=color.blue)
 
-for i in range(num_magnets):
-    angle = i * angle_between_magnets + pi/2 + angle_offset
-    x = radius * cos(angle)
-    y = radius * sin(angle)
-    start_point = vector(x, y, 0)
-    direction = vector(cos(angle), sin(angle), 0)
-    draw_field_line(start_point, direction, 2, color=color.green)
+# for i in range(num_magnets):
+#     angle = i * angle_between_magnets + pi/2 + angle_offset
+#     x = radius * cos(angle)
+#     y = radius * sin(angle)
+#     start_point = vector(x, y, 0)
+#     direction = vector(-cos(angle), -sin(angle), 0)
+#     draw_field_line(start_point, direction, 2, color=color.green)
 
-north_slab = box(pos= vec(0,slab_thickness/2,0), length = radius* 7/6, height = slab_thickness, width = magnet_height, color = color.red) 
-south_slab = box(pos= vec(0,-slab_thickness/2,0), length = radius* 7/6, height = slab_thickness, width = magnet_height, color = color.blue) 
+# north_slab = box(pos= vec(0,slab_thickness/2,0), length = radius* 7/6, height = slab_thickness, width = magnet_height, color = color.red) 
+# south_slab = box(pos= vec(0,-slab_thickness/2,0), length = radius* 7/6, height = slab_thickness, width = magnet_height, color = color.blue) 
 
 
 while True:
