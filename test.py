@@ -98,8 +98,6 @@ while True:
     for boxi in carved_sections:
         boxi.rotate(angle = mag(angular_velocity) *  dt, axis= vector(0,0,1),origin=vec(0, 0, 0))
 
-    # for i in range(len(carved_sections)):
-    #     car
 
     # Update Time
     t += dt

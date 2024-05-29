@@ -41,8 +41,8 @@ for i in range(len(perimeter) - 1):
     carved_sections.append(section)
 
 #Parameters for Rotational Motion
-# torque = vector(0,0,0.1)
-# angular_velocity = vector(0,0,0) # initial angular vecelity
+torque = vector(0,0,0.1)
+angular_velocity = vector(0,0,0) # initial angular vecelity
 moment_of_inertia = (1/12) * (plane_length ** 2 + plane_width ** 2) # MOI for Rectangle
 
 #Parameters for Time
@@ -86,15 +86,29 @@ for i in range(num_magnets):
     direction = vector(-1, 0, 0)
     draw_field_line(start_point, direction, 2*x, color=color.blue)
 
-def getTorque():
-    force = current * 
+# def getTorque():
+#     force = current * 
+
+def current_slider_change(slider):
+    print(f'Current: {slider.value}')
+
+def magnetic_field_slider_change(slider):
+    print(f'Magnetic Field: {slider.value}')
+
+# def slider2_change(slider):
+#     print("Ball color intensity:", slider.value/100)
+
+# Creating the sliders
+wtext(text="Wire Current: \n")
+current_slider = slider(min=1, max=5, value=3, step = 1, length=220, bind=current_slider_change , right=15)
+wtext(text = "\nStrength of Magnetic Field: \n")
+magnetic_field_slider = slider(min=1, max=5, value=3, step = 1, length=220, bind=magnetic_field_slider_change, right=15)
 
 
-
-angular_velocity = 0
+# angular_velocity = 0
 while True:
     rate(100)
-    torque = getTorque
+    # torque = getTorque
     
     # Calculate Angular Acceleration
     angular_acceleration = torque/moment_of_inertia
@@ -106,8 +120,6 @@ while True:
     for boxi in carved_sections:
         boxi.rotate(angle = mag(angular_velocity) *  dt, axis= vector(0,0,1),origin=vec(0, 0, 0))
 
-    # for i in range(len(carved_sections)):
-    #     car
 
     # Update Time
     t += dt
