@@ -21,8 +21,8 @@ current = 12
 #Parameters for Plane
 plane_length = radius * 3/2
 plane_width = magnet_height
-plane_thickness = 0.05
-# plane = box(pos=vector(0,0,0), length=plane_length, height=plane_thickness, width=plane_width, color=color.cyan)
+plane_thickness = 0.1
+
 
 perimeter = [
     vector(-plane_length/2, 0, -plane_width/2),
@@ -39,6 +39,13 @@ for i in range(len(perimeter) - 1):
     section_direction = norm(perimeter[i+1] - perimeter[i])
     section = box(pos=section_center, length=section_length, height=plane_thickness, width=plane_thickness, axis=section_direction, color=color.cyan)
     carved_sections.append(section)
+
+induced_fields = []
+scale = 0.85
+top_plane = box(pos=vector(0,plane_thickness,0), length=plane_length*scale, height=plane_thickness*scale, width=plane_width * scale, color=color.red)
+bottom_plane = box(pos=vector(0,-plane_thickness,0), length=plane_length*scale, height=plane_thickness * scale, width=plane_width * scale, color=color.blue)
+induced_fields.append(top_plane)
+induced_fields.append(bottom_plane)
 
 #Parameters for Rotational Motion
 torque = vector(0,0,0.1)
@@ -62,6 +69,8 @@ for i in range(num_magnets):
     rotation_angle = angle + pi / 2
     magnet = box(pos=position, size=vector(magnet_length, magnet_width, magnet_height), color=color.red)
     magnet.rotate(angle=rotation_angle, axis=vector(0, 0, 1))
+
+
 # Creating the south pole magnet
 for i in range(num_magnets):
     angle = i * angle_between_magnets + pi/2 + angle_offset
@@ -95,15 +104,21 @@ def current_slider_change(slider):
 def magnetic_field_slider_change(slider):
     print(f'Magnetic Field: {slider.value}')
 
-# def slider2_change(slider):
-#     print("Ball color intensity:", slider.value/100)
+def current_direction_button_change(button):
+    for field in induced_fields:
+        if(field.color == color.red):
+            field.color = color.blue
+        else:
+            field.color = color.red
 
 # Creating the sliders
-wtext(text="Wire Current: \n")
-current_slider = slider(min=1, max=5, value=3, step = 1, length=220, bind=current_slider_change , right=15)
 wtext(text = "\nStrength of Magnetic Field: \n")
 magnetic_field_slider = slider(min=1, max=5, value=3, step = 1, length=220, bind=magnetic_field_slider_change, right=15)
-
+wtext(text="\nWire Current: \n")
+current_slider = slider(min=1, max=5, value=3, step = 1, length=220, bind=current_slider_change , right=15)
+wtext(text="\n")
+# Create the button to change the direction of current
+clrbtn = button(bind=current_direction_button_change, text='Click to change direction of current!', background=color.white)
 
 # angular_velocity = 0
 while True:
@@ -116,10 +131,12 @@ while True:
     # Update Angular Velocity
     angular_velocity += angular_acceleration * dt
 
-    # Update plane rotation
+    # Update wire rotation
     for boxi in carved_sections:
         boxi.rotate(angle = mag(angular_velocity) *  dt, axis= vector(0,0,1),origin=vec(0, 0, 0))
-
+    #Update induced magnetic field rotation
+    for field in induced_fields:
+        field.rotate(angle = mag(angular_velocity) *  dt, axis= vector(0,0,1),origin=vec(0, 0, 0))
 
     # Update Time
     t += dt
