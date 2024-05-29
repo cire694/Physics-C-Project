@@ -11,6 +11,7 @@ magnet_width = 0.25  # Width of each magnet
 magnet_height = 5   # Height of each magnet
 angle_offset = pi/4
 slab_thickness = 0.4
+magnetic_field = 3
 
 
 # Parameters for Wire
@@ -48,8 +49,8 @@ induced_fields.append(top_plane)
 induced_fields.append(bottom_plane)
 
 #Parameters for Rotational Motion
-torque = vector(0,0,0.1)
-angular_velocity = vector(0,0,0) # initial angular vecelity
+# torque = vector(0,0,0.1)
+angular_velocity = vector(0,0,0) # initial angular veclocity 
 moment_of_inertia = (1/12) * (plane_length ** 2 + plane_width ** 2) # MOI for Rectangle
 
 #Parameters for Time
@@ -120,11 +121,31 @@ wtext(text="\n")
 # Create the button to change the direction of current
 clrbtn = button(bind=current_direction_button_change, text='Click to change direction of current!', background=color.white)
 
-# angular_velocity = 0
+
+def getMagneticField():
+    return magnetic_field * vec(-1, 0, 0) 
+
+
+def getWireLength():
+    return plane_length * vec(0, 0, -1)
+
+def getCurrent(): 
+    return current
+
+def getTorque(): 
+    force = getCurrent() * cross(getWireLength(), getMagneticField())
+    r = carved_sections[0].pos
+    torque = cross(r, force)
+    return torque
+
+
+
 while True:
     rate(100)
     # torque = getTorque
     
+    torque = getTorque()
+    print(torque)
     # Calculate Angular Acceleration
     angular_acceleration = torque/moment_of_inertia
 
