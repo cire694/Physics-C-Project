@@ -60,6 +60,34 @@ t = 0
 # Angle between each magnet
 angle_between_magnets = (pi - 2 * angle_offset) / (num_magnets -1)
 
+
+
+def current_slider_change(slider):
+    print(f'Current: {slider.value}')
+
+def magnetic_field_slider_change(slider):
+    print(f'Magnetic Field: {slider.value}')
+
+def current_direction_button_change(button):
+    for field in induced_fields:
+        if(field.color == color.red):
+            field.color = color.blue
+        else:
+            field.color = color.red
+
+# Creating the sliders
+wtext(text = "\nStrength of Magnetic Field: \n")
+magnetic_field_slider = slider(min=1, max=5, value=3, step = 1, length=220, bind=magnetic_field_slider_change, right=15)
+wtext(text="\nWire Current: \n")
+current_slider = slider(min=1, max=5, value=3, step = 1, length=220, bind=current_slider_change , right=15)
+wtext(text="\n")
+# Create the button to change the direction of current
+clrbtn = button(bind=current_direction_button_change, text='Click to change direction of current!', background=color.white)
+
+# Creating the Graph
+g1 = graph(width=350, height=250, xtitle=("Time"), ytitle=("Angular Velocity"), align='left', scroll=True, xmin=0, xmax=7200000)
+kDots=gdots(color=color.red, graph=g1)
+
 # Create the magnets
 # Creating the north pole magnet
 for i in range(num_magnets):
@@ -99,27 +127,6 @@ for i in range(num_magnets):
 # def getTorque():
 #     force = current * 
 
-def current_slider_change(slider):
-    print(f'Current: {slider.value}')
-
-def magnetic_field_slider_change(slider):
-    print(f'Magnetic Field: {slider.value}')
-
-def current_direction_button_change(button):
-    for field in induced_fields:
-        if(field.color == color.red):
-            field.color = color.blue
-        else:
-            field.color = color.red
-
-# Creating the sliders
-wtext(text = "\nStrength of Magnetic Field: \n")
-magnetic_field_slider = slider(min=1, max=5, value=3, step = 1, length=220, bind=magnetic_field_slider_change, right=15)
-wtext(text="\nWire Current: \n")
-current_slider = slider(min=1, max=5, value=3, step = 1, length=220, bind=current_slider_change , right=15)
-wtext(text="\n")
-# Create the button to change the direction of current
-clrbtn = button(bind=current_direction_button_change, text='Click to change direction of current!', background=color.white)
 
 
 def getMagneticField():
@@ -137,6 +144,11 @@ def getTorque():
     r = carved_sections[0].pos
     torque = cross(r, force)
     return torque
+
+# def getFlux():
+
+# def backEMF():
+
 
 
 
