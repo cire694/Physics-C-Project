@@ -11,7 +11,7 @@ magnet_width = 0.25  # Width of each magnet
 magnet_height = 5   # Height of each magnet
 angle_offset = pi/4
 slab_thickness = 0.4
-magnetic_field = 3
+magnetic_field = 5
 
 
 # Parameters for Wire
