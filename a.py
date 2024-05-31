@@ -147,10 +147,8 @@ def getTorque():
 def signum(x):
     return -1 if x < 0 else 1
 
-# get the toque from blue
-def getTorqueBlue():
-    force = getCurrent() * cross(getWireLength(), getMagneticField() / 2)
-
+def switch_current():
+    
 
 while True:
     rate(50)
