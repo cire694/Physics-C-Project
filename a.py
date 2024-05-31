@@ -24,6 +24,8 @@ plane_length = radius * 3/2
 plane_width = magnet_height
 plane_thickness = 0.1
 
+# Direction of Current
+current = 1 # 1 is clockwise, -1 is counterclockwise
 
 # Create position vectors of the corners of our wire lopo
 perimeter = [
@@ -92,6 +94,7 @@ wtext(text="\n")
 # Create the button to change the direction of current
 clrbtn = button(bind=current_direction_button_change, text='Click to change direction of current!', background=color.white)
 # Create the button to show/hide the magnetic 
+wtext(text="\n")
 magneticFieldButton = button(bind = magnetic_field_button_change, text = "Click to show/hide magnetic field", background = color.white)
 
 # Creating the Graph
@@ -162,9 +165,11 @@ def getTorque():
 
 while True:
     rate(50)
+
+    # print(f'Wire Vector : {getWireLength()}')
+    # print(f'Magnetic Field Vector : {getMagneticField()}')
     
     torque = getTorque()
-    # print(torque)
     # Calculate Angular Acceleration
     angular_acceleration = torque/moment_of_inertia
 
@@ -179,9 +184,6 @@ while True:
     for field in induced_fields:
         field.rotate(angle = mag(angular_velocity) *  dt, axis= vector(0,0,1),origin=vec(0, 0, 0))
     
-
-
-
     # Update Time
     t += dt
 
