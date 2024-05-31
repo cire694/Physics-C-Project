@@ -24,7 +24,10 @@ plane_length = radius * 3/2
 plane_width = magnet_height
 plane_thickness = 0.1
 
+# Direction of Current
+current = 1 # 1 is clockwise, -1 is counterclockwise
 
+# Create position vectors of the corners of our wire lopo
 perimeter = [
     vector(-plane_length/2, 0, -plane_width/2),
     vector(-plane_length/2, 0, plane_width/2),
@@ -33,6 +36,7 @@ perimeter = [
     vector(-plane_length/2, 0, -plane_width/2) # Close the loop
 ]
 
+# Create boxes coneecting the position vectors
 carved_sections = []
 for i in range(len(perimeter) - 1):
     section_length = mag(perimeter[i] - perimeter[i+1])
@@ -41,6 +45,7 @@ for i in range(len(perimeter) - 1):
     section = box(pos=section_center, length=section_length, height=plane_thickness, width=plane_thickness, axis=section_direction, color=color.cyan)
     carved_sections.append(section)
 
+# Creating the induced fields from the wire loop
 induced_fields = []
 scale = 0.85
 top_plane = box(pos=vector(0,plane_thickness,0), length=plane_length*scale, height=plane_thickness*scale, width=plane_width * scale, color=color.red)
@@ -64,19 +69,24 @@ t = 0
 angle_between_magnets = (pi - 2 * angle_offset) / (num_magnets -1)
 
 
-
+# Function that runs on current slider change
 def current_slider_change(slider):
     print(f'Current: {slider.value}')
-
+# Function that runs on magnetic field slider change
 def magnetic_field_slider_change(slider):
     print(f'Magnetic Field: {slider.value}')
-
+# Function that runs on current direction button change
 def current_direction_button_change(button):
     for field in induced_fields:
         if(field.color == color.red):
             field.color = color.blue
         else:
             field.color = color.red
+# Function that runs on show magnetic field button change
+def magnetic_field_button_change(button):
+    for line in magnetic_field_arrows:
+        line.visible = not (line.visible)
+
 
 # Creating the sliders
 wtext(text = "\nStrength of Magnetic Field: \n")
@@ -86,10 +96,13 @@ current_slider = slider(min=1, max=5, value=3, step = 1, length=220, bind=curren
 wtext(text="\n")
 # Create the button to change the direction of current
 clrbtn = button(bind=current_direction_button_change, text='Click to change direction of current!', background=color.white)
+# Create the button to show/hide the magnetic 
+wtext(text="\n")
+magneticFieldButton = button(bind = magnetic_field_button_change, text = "Click to show/hide magnetic field", background = color.white)
 
 # Creating the Graph
-g1 = graph(width=350, height=250, xtitle=("Time"), ytitle=("Angular Velocity"), align='left', scroll=True, xmin=0, xmax=7200000)
-kDots=gdots(color=color.red, graph=g1)
+angular_velocity_graph = graph(width=350, height=250, xtitle=("Time"), ytitle=("Angular Velocity"), align='left', scroll=True, xmin=0, xmax=5)
+kDots=gdots(color=color.red, graph=angular_velocity_graph)
 
 # Create the magnets
 # Creating the north pole magnet
@@ -113,11 +126,11 @@ for i in range(num_magnets):
     magnet = box(pos=position, size=vector(magnet_length, magnet_width, magnet_height), color=color.blue)
     magnet.rotate(angle=rotation_angle, axis=vector(0, 0, 1))
 
-
+magnetic_field_arrows = []
 
 # Add magnetic field lines
 def draw_field_line(start_point, direction, length, color=color.blue):
-    arrow(pos=start_point, axis=length * direction, color=color,shaftwidth = 0.01)
+    magnetic_field_arrows.append(arrow(pos=start_point, axis=length * direction, color=color,shaftwidth = 0.01))
 
 for i in range(num_magnets):
     angle = i * angle_between_magnets - pi/2 + angle_offset
@@ -126,9 +139,6 @@ for i in range(num_magnets):
     start_point = vector(x, y, 0)
     direction = vector(-1, 0, 0)
     draw_field_line(start_point, direction, 2*x, color=color.blue)
-
-# def getTorque():
-#     force = current * 
 
 
 
@@ -145,6 +155,8 @@ def getCurrent():
 def getTorque(): 
     force = getCurrent() * cross( - getWireLength(),  getMagneticField())
     r = carved_sections[0].pos
+    # box0 = carved_sections[0]
+    # angle = sin(atan2(box0.pos.y, box0.pos.x))
     # print(f'r : {r}')
     # print(f'force: {force}')
 
@@ -154,14 +166,16 @@ def getTorque():
 def signum(x):
     return -1 if x < 0 else 1
 
-# get the toque from blue
-def getTorqueBlue():
-    force = getCurrent() * cross(getWireLength(), getMagneticField() / 2)
+# def backEMF():
+
+
 
 
 while True:
     rate(50)
-    # torque = getTorque
+
+    # print(f'Wire Vector : {getWireLength()}')
+    # print(f'Magnetic Field Vector : {getMagneticField()}')
     
     torque = getTorque()
     
@@ -171,6 +185,8 @@ while True:
 
     # Update Angular Velocity
     angular_velocity += angular_acceleration * dt
+    kDots.plot(t, angular_velocity.z)
+
     # print(f"torque: {torque}")
     # Update wire rotation
     # print(f" sign: {signum(angular_velocity.y)}")
