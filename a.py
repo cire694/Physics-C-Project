@@ -25,7 +25,7 @@ plane_width = magnet_height
 plane_thickness = 0.1
 
 # Direction of Current
-current = 1 # 1 is clockwise, -1 is counterclockwise
+current_direction = 1 # 1 is clockwise, -1 is counterclockwise
 
 # Create position vectors of the corners of our wire lopo
 perimeter = [
@@ -77,6 +77,8 @@ def magnetic_field_slider_change(slider):
     print(f'Magnetic Field: {slider.value}')
 # Function that runs on current direction button change
 def current_direction_button_change(button):
+    global current_direction
+    current_direction = current_direction * -1
     for field in induced_fields:
         if(field.color == color.red):
             field.color = color.blue
@@ -147,7 +149,7 @@ def getMagneticField():
 
 
 def getWireLength():
-    return plane_length * vec(0, 0, -1)
+    return plane_length * vec(0, 0, current_direction)
 
 def getCurrent(): 
     return current
@@ -155,11 +157,6 @@ def getCurrent():
 def getTorque(): 
     force = getCurrent() * cross( - getWireLength(),  getMagneticField())
     r = carved_sections[0].pos
-    # box0 = carved_sections[0]
-    # angle = sin(atan2(box0.pos.y, box0.pos.x))
-    # print(f'r : {r}')
-    # print(f'force: {force}')
-
     torque = cross(r, force)
     return torque
 
@@ -174,8 +171,7 @@ def signum(x):
 while True:
     rate(50)
 
-    # print(f'Wire Vector : {getWireLength()}')
-    # print(f'Magnetic Field Vector : {getMagneticField()}')
+    # print(f'Current Direction Vector : {current_direction}')
     
     torque = getTorque()
     
