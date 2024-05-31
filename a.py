@@ -11,7 +11,7 @@ magnet_width = 0.25  # Width of each magnet
 magnet_height = 5   # Height of each magnet
 angle_offset = pi/4
 slab_thickness = 0.4
-magnetic_field = 3
+magnetic_field = 5
 
 
 # Parameters for Wire
@@ -51,6 +51,9 @@ induced_fields.append(bottom_plane)
 #Parameters for Rotational Motion
 # torque = vector(0,0,0.1)
 angular_velocity = vector(0,0,0) # initial angular veclocity 
+# mass_wire = 0.001
+
+# remember to change MOI
 moment_of_inertia = (1/12) * (plane_length ** 2 + plane_width ** 2) # MOI for Rectangle
 
 #Parameters for Time
@@ -140,36 +143,44 @@ def getCurrent():
     return current
 
 def getTorque(): 
-    force = getCurrent() * cross(getWireLength(), getMagneticField())
+    force = getCurrent() * cross( - getWireLength(),  getMagneticField())
     r = carved_sections[0].pos
+    # print(f'r : {r}')
+    # print(f'force: {force}')
+
     torque = cross(r, force)
     return torque
 
-# def getFlux():
+def signum(x):
+    return -1 if x < 0 else 1
 
-# def backEMF():
-
-
+# get the toque from blue
+def getTorqueBlue():
+    force = getCurrent() * cross(getWireLength(), getMagneticField() / 2)
 
 
 while True:
-    rate(100)
+    rate(50)
     # torque = getTorque
     
     torque = getTorque()
-    print(torque)
+    
     # Calculate Angular Acceleration
     angular_acceleration = torque/moment_of_inertia
 
+
     # Update Angular Velocity
     angular_velocity += angular_acceleration * dt
-
+    # print(f"torque: {torque}")
     # Update wire rotation
+    # print(f" sign: {signum(angular_velocity.y)}")
+    # print(f"angular velocity: {angular_velocity.z}")
+    
     for boxi in carved_sections:
-        boxi.rotate(angle = mag(angular_velocity) *  dt, axis= vector(0,0,1),origin=vec(0, 0, 0))
+        boxi.rotate(angle = mag(angular_velocity) * signum(angular_velocity.z) *  dt, axis= vector(0,0,1),origin=vec(0, 0, 0))
     #Update induced magnetic field rotation
     for field in induced_fields:
-        field.rotate(angle = mag(angular_velocity) *  dt, axis= vector(0,0,1),origin=vec(0, 0, 0))
+        field.rotate(angle = mag(angular_velocity) * signum(angular_velocity.z)*  dt, axis= vector(0,0,1),origin=vec(0, 0, 0))
 
     # Update Time
     t += dt
