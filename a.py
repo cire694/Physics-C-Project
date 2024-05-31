@@ -14,6 +14,9 @@ slab_thickness = 0.4
 magnetic_field = 5
 
 
+mu_0 = 4 * pi * 10**-7
+resistance = 3
+
 # Parameters for Wire
 axis_of_rotation = cylinder(pos=vector(0,0,-magnet_height/2), axis=vector(0,0,magnet_height), radius=0.05, color=color.gray(0.5)) # Central Axis
 current = 12
@@ -145,6 +148,8 @@ for i in range(num_magnets):
 def getMagneticField():
     return magnetic_field * vec(-1, 0, 0) 
 
+def getNetMagneticField(omega):
+    return (magnetic_field - inducedB(omega)) * vec(-1, 0, 0) 
 
 def getWireLength():
     return plane_length * vec(0, 0, -1)
@@ -152,8 +157,26 @@ def getWireLength():
 def getCurrent(): 
     return current
 
+def getAngle(): 
+    return atan2(carved_sections[0].pos.x, carved_sections[0].pos.y)
+
+# omega is angular velocity
+def getBackEMF(omega): 
+    area = plane_width * plane_length
+    # this is in radians
+    angle =  getAngle()
+    print(cos(angle))
+    return magnetic_field * area * omega * cos(angle)
+
+def inducedB(omega):
+    
+    return mu_0 * getBackEMF(omega) / resistance
+    
+
+
+
 def getTorque(): 
-    force = getCurrent() * cross( - getWireLength(),  getMagneticField())
+    force = getCurrent() * cross(getWireLength(),  getMagneticField())
     r = carved_sections[0].pos
     # box0 = carved_sections[0]
     # angle = sin(atan2(box0.pos.y, box0.pos.x))
@@ -163,18 +186,31 @@ def getTorque():
     torque = cross(r, force)
     return torque
 
+def getNetTorque(omega): 
+    force = getCurrent() * cross(getWireLength(),  getNetMagneticField(omega))
+    r = carved_sections[0].pos
+    # box0 = carved_sections[0]
+    # angle = sin(atan2(box0.pos.y, box0.pos.x))
+    # print(f'r : {r}')
+    # print(f'force: {force}')
+
+    torque = cross(r, force)
+    return torque
+
+
 def signum(x):
     return -1 if x < 0 else 1
 
-def switch_current():
-    
+# def backEMF():
+
 
 while True:
     rate(50)
 
     # print(f'Wire Vector : {getWireLength()}')
     # print(f'Magnetic Field Vector : {getMagneticField()}')
-    
+    print(f"angle: {getAngle()}")
+    # torque = getNetTorque(angular_velocity)
     torque = getTorque()
     
     # Calculate Angular Acceleration
