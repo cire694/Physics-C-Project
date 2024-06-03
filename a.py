@@ -224,7 +224,7 @@ def getBackEMF(omega):
     return magnetic_field * area * omega * cos(angle)
 
 def inducedB(omega):
-    
+    print(getBackEMF(omega))
     return mu_0 * getBackEMF(omega) / resistance
     
 
@@ -264,10 +264,10 @@ while True:
 
     # print(f'Current Direction Vector : {current_direction}')
     
-    if(abs(carved_sections[2].pos.x) < 0.2):
-        current_direction_button_change()
-    curr_angle = atan2(carved_sections[2].pos.y, carved_sections[2].pos.x )
-    print(degrees(curr_angle))
+    # if(abs(carved_sections[2].pos.x) < 0.2):
+    #     current_direction_button_change()
+    # curr_angle = atan2(carved_sections[2].pos.y, carved_sections[2].pos.x )
+    # print(degrees(curr_angle))
 
     print(f"angle: {getAngle()}")
     # torque = getNetTorque(angular_velocity)
@@ -282,7 +282,7 @@ while True:
     kDots.plot(t, angular_velocity.z)
 
     # angular_velocity = vector(0,0,0)
-
+    inducedB(angular_velocity)
     # print(f"torque: {torque}")
     # Update wire rotation
     # print(f" sign: {signum(angular_velocity.y)}")
