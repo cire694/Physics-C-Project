@@ -28,14 +28,7 @@ plane_thickness = 0.1
 # Direction of Current
 current_direction = 1 # 1 is clockwise, -1 is counterclockwise
 
-# Create position vectors of the corners of our wire lopo
-armature_perimeter = [
-    vector(-plane_length/2, 0, -plane_width/2),
-    vector(-plane_length/2, 0, plane_width/2),
-    vector(plane_length/2, 0 , plane_width/2),
-    vector(plane_length/2, 0, -plane_width/2),
-    vector(-plane_length/2, 0, -plane_width/2) # Close the loop
-]
+# Create position vectors of the corners of our wire loop
 
 
 armature_perimeter = [
@@ -53,7 +46,11 @@ armature_perimeter = [
 
 circuit_perimeter = [
     vector(plane_length/8,0, plane_width),
-    vector(plane_length, 0,plane_width),
+    vector(plane_length/2, 0,plane_width),
+    vector(plane_length/2, 0,  2 * plane_width),
+    vector(-plane_length/2, 0, 2 * plane_width),
+    vector(-plane_length/2, 0, plane_width),
+    vector(-plane_length/8, 0, plane_width)
     # vector(plane_length/)
 ]
 
