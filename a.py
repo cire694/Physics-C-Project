@@ -9,9 +9,10 @@ radius = 5       # Radius of the stator
 magnet_length = 2  # Length of each magnet
 magnet_width = 0.25  # Width of each magnet
 magnet_height = 5   # Height of each magnet
-angle_offset = pi/4
-slab_thickness = 0.4
-magnetic_field = 5
+angle_offset = pi/4 
+
+magnetic_field = 0.1
+
 
 
 mu_0 = 4 * pi * 10**-7
@@ -19,7 +20,7 @@ resistance = 3
 
 # Parameters for Wire
 axis_of_rotation = cylinder(pos=vector(0,0,-magnet_height/2), axis=vector(0,0,magnet_height), radius=0.05, color=color.gray(0.5)) # Central Axis
-current = 12
+current = 0.1
 
 
 #Parameters for Plane
@@ -28,10 +29,10 @@ plane_width = magnet_height
 plane_thickness = 0.1
 
 # Direction of Current
-current = 1 # 1 is clockwise, -1 is counterclockwise
+current_direction = 1 # 1 is clockwise, -1 is counterclockwise
 
 # Create position vectors of the corners of our wire lopo
-perimeter = [
+armature_perimeter = [
     vector(-plane_length/2, 0, -plane_width/2),
     vector(-plane_length/2, 0, plane_width/2),
     vector(plane_length/2, 0 , plane_width/2),
@@ -39,20 +40,49 @@ perimeter = [
     vector(-plane_length/2, 0, -plane_width/2) # Close the loop
 ]
 
-# Create boxes coneecting the position vectors
+
+armature_perimeter = [
+    vector(-plane_length/2, 0, plane_width/2),
+    vector(-plane_length/2, 0, -plane_width/2),
+    vector(plane_length/2, 0, -plane_width/2),
+    vector(plane_length/2, 0 , plane_width/2),
+    vector(plane_length/8,0,plane_width/2),
+    vector(plane_length/8,0,plane_width),
+    vector(-plane_length/8,0,plane_width),
+    vector(-plane_length/8,0,plane_width/2),
+    vector(-plane_length/2,0, plane_width/2)
+    # Close the loop
+]
+
+circuit_perimeter = [
+    vector(plane_length/8,0, plane_width),
+    vector(plane_length, 0,plane_width),
+    # vector(plane_length/)
+]
+
+# Create boxes coneecting the armature position vectors
 carved_sections = []
-for i in range(len(perimeter) - 1):
-    section_length = mag(perimeter[i] - perimeter[i+1])
-    section_center = (perimeter[i] + perimeter[i+1]) / 2
-    section_direction = norm(perimeter[i+1] - perimeter[i])
-    section = box(pos=section_center, length=section_length, height=plane_thickness, width=plane_thickness, axis=section_direction, color=color.cyan)
+for i in range(len(armature_perimeter) - 1):
+    section_length = mag(armature_perimeter[i] - armature_perimeter[i+1])
+    section_center = (armature_perimeter[i] + armature_perimeter[i+1]) / 2
+    section_direction = norm(armature_perimeter[i+1] - armature_perimeter[i])
+    section = box(pos=section_center, length=section_length, height=plane_thickness, width=plane_thickness, axis=section_direction, color=color.yellow)
     carved_sections.append(section)
+#
+
+armature_sections = []
+for i in range (len(circuit_perimeter) - 1):
+    section_length = mag(circuit_perimeter[i] - circuit_perimeter[i+1])
+    section_center = (circuit_perimeter[i] + circuit_perimeter[i+1]) / 2
+    section_direction = norm(circuit_perimeter[i+1] - circuit_perimeter[i])
+    section = box(pos=section_center, length=section_length, height=plane_thickness, width=plane_thickness, axis=section_direction, color=color.yellow)
+    armature_sections.append(section)
 
 # Creating the induced fields from the wire loop
 induced_fields = []
 scale = 0.85
-top_plane = box(pos=vector(0,plane_thickness,0), length=plane_length*scale, height=plane_thickness*scale, width=plane_width * scale, color=color.red)
-bottom_plane = box(pos=vector(0,-plane_thickness,0), length=plane_length*scale, height=plane_thickness * scale, width=plane_width * scale, color=color.blue)
+top_plane = box(pos=vector(0,plane_thickness,0), length=plane_length*scale, height=plane_thickness*scale, width=plane_width * scale, color=color.blue)
+bottom_plane = box(pos=vector(0,-plane_thickness,0), length=plane_length*scale, height=plane_thickness * scale, width=plane_width * scale, color=color.red)
 induced_fields.append(top_plane)
 induced_fields.append(bottom_plane)
 
@@ -74,12 +104,16 @@ angle_between_magnets = (pi - 2 * angle_offset) / (num_magnets -1)
 
 # Function that runs on current slider change
 def current_slider_change(slider):
-    print(f'Current: {slider.value}')
+    global current
+    current = slider.value
 # Function that runs on magnetic field slider change
 def magnetic_field_slider_change(slider):
-    print(f'Magnetic Field: {slider.value}')
+    global magnetic_field
+    magnetic_field = slider.value
 # Function that runs on current direction button change
-def current_direction_button_change(button):
+def current_direction_button_change():
+    global current_direction
+    current_direction = current_direction * -1
     for field in induced_fields:
         if(field.color == color.red):
             field.color = color.blue
@@ -93,9 +127,9 @@ def magnetic_field_button_change(button):
 
 # Creating the sliders
 wtext(text = "\nStrength of Magnetic Field: \n")
-magnetic_field_slider = slider(min=1, max=5, value=3, step = 1, length=220, bind=magnetic_field_slider_change, right=15)
+magnetic_field_slider = slider(min=0, max=10, value=3, step = 1, length=220, bind=magnetic_field_slider_change, right=15)
 wtext(text="\nWire Current: \n")
-current_slider = slider(min=1, max=5, value=3, step = 1, length=220, bind=current_slider_change , right=15)
+current_slider = slider(min=0, max=5, value=10, step = 1, length=220, bind=current_slider_change , right=15)
 wtext(text="\n")
 # Create the button to change the direction of current
 clrbtn = button(bind=current_direction_button_change, text='Click to change direction of current!', background=color.white)
@@ -144,6 +178,27 @@ for i in range(num_magnets):
     draw_field_line(start_point, direction, 2*x, color=color.blue)
 
 
+# Parameters for the commutator
+com_radius = plane_length/8
+com_length = 0.2
+com_width = 0.1
+com_height = 1
+
+
+com_pieces = []
+pieces = int(40)
+for i in range(pieces):
+    if( i == pieces/4 or i == pieces * 3/4):
+        continue
+    angle = i * 2 * pi/pieces
+    x = com_radius * cos(angle)
+    y = com_radius * sin(angle)
+    position = vector(x,y,plane_width)
+    rotation_angle = angle + pi/2
+    com = box(pos = position, size = vector(com_length, com_width, com_height), color = color.orange)
+    com.rotate(angle=rotation_angle, axis = vector(0,0,1))
+    com_pieces.append(com)
+
 
 def getMagneticField():
     return magnetic_field * vec(-1, 0, 0) 
@@ -152,7 +207,7 @@ def getNetMagneticField(omega):
     return (magnetic_field - inducedB(omega)) * vec(-1, 0, 0) 
 
 def getWireLength():
-    return plane_length * vec(0, 0, -1)
+    return plane_length * vec(0, 0, current_direction)
 
 def getCurrent(): 
     return current
@@ -205,10 +260,15 @@ def signum(x):
 
 
 while True:
-    rate(50)
+    rate(500)
 
-    # print(f'Wire Vector : {getWireLength()}')
-    # print(f'Magnetic Field Vector : {getMagneticField()}')
+    # print(f'Current Direction Vector : {current_direction}')
+    
+    if(abs(carved_sections[2].pos.x) < 0.2):
+        current_direction_button_change()
+    curr_angle = atan2(carved_sections[2].pos.y, carved_sections[2].pos.x )
+    print(degrees(curr_angle))
+
     print(f"angle: {getAngle()}")
     # torque = getNetTorque(angular_velocity)
     torque = getTorque()
@@ -221,16 +281,22 @@ while True:
     angular_velocity += angular_acceleration * dt
     kDots.plot(t, angular_velocity.z)
 
+    # angular_velocity = vector(0,0,0)
+
     # print(f"torque: {torque}")
     # Update wire rotation
     # print(f" sign: {signum(angular_velocity.y)}")
     # print(f"angular velocity: {angular_velocity.z}")
     
+    # Update wire rotation
     for boxi in carved_sections:
         boxi.rotate(angle = mag(angular_velocity) * signum(angular_velocity.z) *  dt, axis= vector(0,0,1),origin=vec(0, 0, 0))
     #Update induced magnetic field rotation
     for field in induced_fields:
         field.rotate(angle = mag(angular_velocity) * signum(angular_velocity.z)*  dt, axis= vector(0,0,1),origin=vec(0, 0, 0))
+    #Update commutator rotation
+    for piece in com_pieces:
+        piece.rotate(angle = mag(angular_velocity) * signum(angular_velocity.z)*  dt, axis= vector(0,0,1),origin=vec(0, 0, 0))
 
     # Update Time
     t += dt
