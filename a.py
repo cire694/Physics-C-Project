@@ -115,6 +115,10 @@ def current_slider_change(slider):
 def magnetic_field_slider_change(slider):
     global magnetic_field
     magnetic_field = slider.value
+def angular_velocity_bound(slider):
+    global angular_velocity_bound
+    angular_velocity_bound = slider.value
+    
 # Function that runs on current direction button change
 def current_direction_button_change():
     global current_direction
@@ -129,22 +133,32 @@ def magnetic_field_button_change(button):
     for line in magnetic_field_arrows:
         line.visible = not (line.visible)
 
+def reset_button():
+    return
+
 
 # Creating the sliders
 wtext(text = "\nStrength of Magnetic Field: \n")
-magnetic_field_slider = slider(min=0, max=10, value=3, step = 1, length=220, bind=magnetic_field_slider_change, right=15)
+magnetic_field_slider = slider(min=0, max=10, value=0, step = 1, length=220, bind=magnetic_field_slider_change, right=15)
 wtext(text="\nWire Current: \n\n")
-current_slider = slider(min=0, max=5, value=10, step = 1, length=220, bind=current_slider_change , right=15)
+current_slider = slider(min=0, max=5, value=0, step = 1, length=220, bind=current_slider_change , right=15)
+wtext(text=f"\n Bound: \n\n")
+bound_slider = slider(min=1, max=5, value=3, step = 1, length=220, bind=angular_velocity_bound , right=15)
 wtext(text="\n\n")
+
 # Create the button to change the direction of current
 clrbtn = button(bind=current_direction_button_change, text='Click to change direction of current!', background=color.white)
 # Create the button to show/hide the magnetic 
 wtext(text="\n\n")
 magneticFieldButton = button(bind = magnetic_field_button_change, text = "Click to show/hide magnetic field", background = color.white)
 wtext(text="\n\n")
+resetbutton = button(bind = reset_button, text = "Reset Simulation" , background = color.white )
+wtext(text="\n\n")
+
 # Creating the Graph
 angular_velocity_graph = graph(width=350, height=250, xtitle=("Time"), ytitle=("Angular Velocity"), align='left', scroll=True, xmin=0, xmax=5)
 kDots=gdots(color=color.red, graph=angular_velocity_graph)
+
 
 # Create the magnets
 # Creating the north pole magnet
@@ -182,6 +196,14 @@ for i in range(num_magnets):
     direction = vector(-1, 0, 0)
     draw_field_line(start_point, direction, 2*x, color=color.blue)
 
+
+# list has to be size 2, 
+def does_pass_angle(angle_list: list, angle : float):
+    bound1 = angle_list[0]
+    bound2 = angle_list[1]
+    diff =  abs(bound2 - bound1)
+    if(diff < 10):
+        return angle > bound1 and angle < bound2 or angle < bound1 and angle > bound2
 
 # Parameters for the commutator
 com_radius = plane_length/8
@@ -226,15 +248,20 @@ def signum(x):
 
 # def backEMF():
 
+degree_angle_list = []
+angular_velocity_bound = 3
+
+
 while True:
-    rate(50)
+    rate(500)
 
     # print(f'Current Direction Vector : {current_direction}')
     
-    # if(abs(carved_sections[2].pos.x) < 0.2):
-    #     current_direction_button_change()
-    # curr_angle = atan2(carved_sections[2].pos.y, carved_sections[2].pos.x )
-    # print(degrees(curr_angle))
+    curr_angle = degrees(atan2(carved_sections[2].pos.y, carved_sections[2].pos.x ))
+    degree_angle_list.append(curr_angle)
+    if(len(degree_angle_list) > 2): degree_angle_list.pop(0)
+    if len(degree_angle_list) == 2 and (does_pass_angle(degree_angle_list, 90) or does_pass_angle(degree_angle_list, -90)) : 
+        current_direction_button_change()
 
     
     torque = getTorque()
@@ -245,6 +272,11 @@ while True:
 
     # Update Angular Velocity
     angular_velocity += angular_acceleration * dt
+    if(angular_velocity.z < 0):
+        angular_velocity.z = max(angular_velocity.z, -angular_velocity_bound)
+    else:
+        angular_velocity.z = min(angular_velocity.z, angular_velocity_bound)
+    
     kDots.plot(t, angular_velocity.z)
 
     # angular_velocity = vector(0,0,0)
