@@ -14,10 +14,15 @@ angle_offset = pi/4
 magnetic_field = 0.1
 
 
+mu_0 = 4 * pi * 10**-7
+
+battery_emf = 12
+resistance = 3
+current = battery_emf / resistance
+
 
 # Parameters for Wire
 axis_of_rotation = cylinder(pos=vector(0,0,-magnet_height/2), axis=vector(0,0,magnet_height), radius=0.05, color=color.gray(0.5)) # Central Axis
-current = 0.1
 
 
 #Parameters for Plane
@@ -159,6 +164,11 @@ wtext(text="\n\n")
 angular_velocity_graph = graph(width=350, height=250, xtitle=("Time"), ytitle=("Angular Velocity"), align='left', scroll=True, xmin=0, xmax=5)
 kDots=gdots(color=color.red, graph=angular_velocity_graph)
 
+back_emf_graph = graph(width=350, height=250, xtitle=("Time"), ytitle=("Back EMF"), align='left', scroll=True, xmin=0, xmax=5)
+emfDots = gdots(color=color.blue, graph=back_emf_graph)
+
+power_graph = graph(width=350, height=250, xtitle="Time", ytitle="Power", align='left', scroll=True, xmin=0, xmax=5)
+pDots = gdots(color=color.green, graph=power_graph)
 
 # Create the magnets
 # Creating the north pole magnet
@@ -230,6 +240,9 @@ for i in range(pieces):
 def getMagneticField():
     return magnetic_field * vec(-1, 0, 0) 
 
+def getNetMagneticField(omega):
+    print(f'inducedB: {inducedB(omega)}')
+    return (magnetic_field  - inducedB(omega)) * vec(-1, 0, 0)
 
 def getWireLength():
     return plane_length * vec(0, 0, current_direction)
@@ -237,11 +250,49 @@ def getWireLength():
 def getCurrent(): 
     return current
 
+def getAngle(): 
+    return atan2(carved_sections[0].pos.x, carved_sections[0].pos.y)
+
+# omega is angular velocity
+def getBackEMF(omega): 
+    area = plane_width * plane_length
+    # this is in radians
+    angle =  getAngle()
+    print(f"omega: {omega}")
+    return magnetic_field * area * mag(omega) * cos(angle)
+
+def inducedB(omega):
+    return mu_0 * getBackEMF(omega) / resistance
+    
+
+
+
 def getTorque(): 
-    force = getCurrent() * cross( - getWireLength(),  getMagneticField())
+    force = getCurrent() * cross(getWireLength(),  getMagneticField())
     r = carved_sections[0].pos
+    # box0 = carved_sections[0]
+    # angle = sin(atan2(box0.pos.y, box0.pos.x))
+    # print(f'r : {r}')
+    # print(f'force: {force}')
+
     torque = cross(r, force)
     return torque
+
+def getNetTorque(omega): 
+
+    print(f"net bfield: {getNetMagneticField(omega)}")
+    force = getCurrent() * cross(getWireLength(),  getNetMagneticField(omega))
+    r = carved_sections[0].pos
+    # box0 = carved_sections[0]
+    # angle = sin(atan2(box0.pos.y, box0.pos.x))
+    # print(f'r : {r}')
+    # print(f'force: {force}')
+
+    torque = cross(r, force)
+    return torque
+
+def getPower(omega):
+    return (battery_emf - getBackEMF(omega)) * getCurrent()
 
 def signum(x):
     return -1 if x < 0 else 1
@@ -251,6 +302,10 @@ def signum(x):
 degree_angle_list = []
 angular_velocity_bound = 3
 
+angular_velocity_original = vec(0, 0, 0)
+
+
+# why is omega in the z direction :skull:
 
 while True:
     rate(500)
@@ -263,11 +318,19 @@ while True:
     if len(degree_angle_list) == 2 and (does_pass_angle(degree_angle_list, 90) or does_pass_angle(degree_angle_list, -90)) : 
         current_direction_button_change()
 
-    
-    torque = getTorque()
+    # print(f"angle: {getAngle()}")
+    # torque = getNetTorque(angular_velocity)
+
+    # it's in the z direction bc torque is the axis
+
+    torque = getNetTorque(angular_velocity)
     
     # Calculate Angular Acceleration
     angular_acceleration = torque/moment_of_inertia
+
+    print(f"net torque: {getNetTorque(angular_velocity)}")
+    print(f"torque {getTorque()}")
+    print(f"diff {getNetTorque(angular_velocity) - getTorque()}")
 
 
     # Update Angular Velocity
@@ -278,13 +341,18 @@ while True:
         angular_velocity.z = min(angular_velocity.z, angular_velocity_bound)
     
     kDots.plot(t, angular_velocity.z)
+    emfDots.plot(t, getBackEMF(angular_velocity))
+    pDots.plot(t, getPower(angular_velocity))
 
-    # angular_velocity = vector(0,0,0)
-
-    # print(f"torque: {torque}")
-    # Update wire rotation
-    # print(f" sign: {signum(angular_velocity.y)}")
-    # print(f"angular velocity: {angular_velocity.z}")
+    torque2 = getTorque()
+    angular_acceleration2 = torque2 / moment_of_inertia
+    angular_velocity_original += angular_acceleration2 * dt
+    
+    # print(angular_velocity_original - angular_velocity)
+    # print(f"magnetic field: {getMagneticField()}")
+    # print(f"net magnetic field: {getNetMagneticField(angular_velocity)}")
+    # print(f"induced b{inducedB(angular_velocity)}")
+    # print(f"getBackEMF: {getBackEMF(angular_velocity)}")
     
     # Update wire rotation
     for boxi in carved_sections:
