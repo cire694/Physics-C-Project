@@ -201,7 +201,7 @@ def getMagneticField():
     return magnetic_field * vec(-1, 0, 0) 
 
 def getNetMagneticField(omega):
-    return (magnetic_field - inducedB(omega)) * vec(-1, 0, 0) 
+    return (magnetic_field) * vec(-1, 0, 0) - inducedB(omega)
 
 def getWireLength():
     return plane_length * vec(0, 0, current_direction)
@@ -217,11 +217,10 @@ def getBackEMF(omega):
     area = plane_width * plane_length
     # this is in radians
     angle =  getAngle()
-    print(cos(angle))
+    print(f"omega: {omega}")
     return magnetic_field * area * omega * cos(angle)
 
 def inducedB(omega):
-    print(getBackEMF(omega))
     return mu_0 * getBackEMF(omega) / resistance
     
 
@@ -254,7 +253,10 @@ def signum(x):
     return -1 if x < 0 else 1
 
 # def backEMF():
+angular_velocity_original = vec(0, 0, 0)
 
+
+# why is omega in the z direction :skull:
 
 while True:
     rate(500)
@@ -266,9 +268,9 @@ while True:
     # curr_angle = atan2(carved_sections[2].pos.y, carved_sections[2].pos.x )
     # print(degrees(curr_angle))
 
-    print(f"angle: {getAngle()}")
+    # print(f"angle: {getAngle()}")
     # torque = getNetTorque(angular_velocity)
-    torque = getTorque()
+    torque = getNetTorque(angular_velocity)
     
     # Calculate Angular Acceleration
     angular_acceleration = torque/moment_of_inertia
@@ -278,12 +280,15 @@ while True:
     angular_velocity += angular_acceleration * dt
     kDots.plot(t, angular_velocity.z)
 
-    # angular_velocity = vector(0,0,0)
-    inducedB(angular_velocity)
-    # print(f"torque: {torque}")
-    # Update wire rotation
-    # print(f" sign: {signum(angular_velocity.y)}")
-    # print(f"angular velocity: {angular_velocity.z}")
+    torque2 = getTorque()
+    angular_acceleration2 = torque2 / moment_of_inertia
+    angular_velocity_original += angular_acceleration2 * dt
+    
+    # print(angular_velocity_original - angular_velocity)
+    print(f"magnetic field: {getMagneticField()}")
+    print(f"net magnetic field: {getNetMagneticField(angular_velocity)}")
+    print(f"induced b{inducedB(angular_velocity)}")
+    print(f"getBackEMF: {getBackEMF(angular_velocity)}")
     
     # Update wire rotation
     for boxi in carved_sections:
