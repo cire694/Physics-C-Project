@@ -47,8 +47,8 @@ armature_perimeter = [
 circuit_perimeter = [
     vector(plane_length/8,0, plane_width),
     vector(plane_length/2, 0,plane_width),
-    vector(plane_length/2, 0,  2 * plane_width),
-    vector(-plane_length/2, 0, 2 * plane_width),
+    vector(plane_length/2, 0,  1.5 * plane_width),
+    vector(-plane_length/2, 0, 1.5 * plane_width),
     vector(-plane_length/2, 0, plane_width),
     vector(-plane_length/8, 0, plane_width)
     # vector(plane_length/)
@@ -57,6 +57,8 @@ circuit_perimeter = [
 # Create boxes coneecting the armature position vectors
 carved_sections = []
 for i in range(len(armature_perimeter) - 1):
+    if i == 5:
+        continue
     section_length = mag(armature_perimeter[i] - armature_perimeter[i+1])
     section_center = (armature_perimeter[i] + armature_perimeter[i+1]) / 2
     section_direction = norm(armature_perimeter[i+1] - armature_perimeter[i])
@@ -71,6 +73,15 @@ for i in range (len(circuit_perimeter) - 1):
     section_direction = norm(circuit_perimeter[i+1] - circuit_perimeter[i])
     section = box(pos=section_center, length=section_length, height=plane_thickness, width=plane_thickness, axis=section_direction, color=color.yellow)
     armature_sections.append(section)
+
+# Add Brushes
+brush_length = 1
+brush_width = 0.5
+brush_height = 0.5
+
+right_brush = box(pos = vector(plane_length/8 + brush_length/2, 0, plane_width), length = brush_length, height = brush_height, width = brush_width, color=color.black)
+left_brush = box(pos = vector(-plane_length/8 - brush_length/2, 0 , plane_width), length = brush_length, height = brush_height, width = brush_width, color=color.black)
+
 
 # Creating the induced fields from the wire loop
 induced_fields = []
@@ -122,15 +133,15 @@ def magnetic_field_button_change(button):
 # Creating the sliders
 wtext(text = "\nStrength of Magnetic Field: \n")
 magnetic_field_slider = slider(min=0, max=10, value=3, step = 1, length=220, bind=magnetic_field_slider_change, right=15)
-wtext(text="\nWire Current: \n")
+wtext(text="\nWire Current: \n\n")
 current_slider = slider(min=0, max=5, value=10, step = 1, length=220, bind=current_slider_change , right=15)
-wtext(text="\n")
+wtext(text="\n\n")
 # Create the button to change the direction of current
 clrbtn = button(bind=current_direction_button_change, text='Click to change direction of current!', background=color.white)
 # Create the button to show/hide the magnetic 
-wtext(text="\n")
+wtext(text="\n\n")
 magneticFieldButton = button(bind = magnetic_field_button_change, text = "Click to show/hide magnetic field", background = color.white)
-
+wtext(text="\n\n")
 # Creating the Graph
 angular_velocity_graph = graph(width=350, height=250, xtitle=("Time"), ytitle=("Angular Velocity"), align='left', scroll=True, xmin=0, xmax=5)
 kDots=gdots(color=color.red, graph=angular_velocity_graph)
@@ -216,14 +227,14 @@ def signum(x):
 # def backEMF():
 
 while True:
-    rate(500)
+    rate(50)
 
     # print(f'Current Direction Vector : {current_direction}')
     
-    if(abs(carved_sections[2].pos.x) < 0.2):
-        current_direction_button_change()
-    curr_angle = atan2(carved_sections[2].pos.y, carved_sections[2].pos.x )
-    print(degrees(curr_angle))
+    # if(abs(carved_sections[2].pos.x) < 0.2):
+    #     current_direction_button_change()
+    # curr_angle = atan2(carved_sections[2].pos.y, carved_sections[2].pos.x )
+    # print(degrees(curr_angle))
 
     
     torque = getTorque()
