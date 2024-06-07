@@ -16,8 +16,8 @@ magnetic_field = 0.1
 
 mu_0 = 4 * pi * 10**-7
 
-battery_emf = 12
-resistance = 3
+battery_emf = 0
+resistance = 1
 current = battery_emf / resistance
 
 
@@ -105,7 +105,7 @@ angular_velocity = vector(0,0,0) # initial angular veclocity
 moment_of_inertia = (1/12) * (plane_length ** 2 + plane_width ** 2) # MOI for Rectangle
 
 #Parameters for Time
-dt = 0.01
+dt = 0.001
 t = 0
 
 # Angle between each magnet
@@ -113,9 +113,13 @@ angle_between_magnets = (pi - 2 * angle_offset) / (num_magnets -1)
 
 
 # Function that runs on current slider change
-def current_slider_change(slider):
-    global current
-    current = slider.value
+def voltage_slider_change(slider):
+    global battery_emf
+    battery_emf = slider.value
+
+def resistance_slide_change(slider):
+    global resistance
+    resistance = slider.value
 # Function that runs on magnetic field slider change
 def magnetic_field_slider_change(slider):
     global magnetic_field
@@ -145,12 +149,15 @@ def reset_button():
 # Creating the sliders
 wtext(text = "\nStrength of Magnetic Field: \n")
 magnetic_field_slider = slider(min=0, max=10, value=0, step = 1, length=220, bind=magnetic_field_slider_change, right=15)
-wtext(text="\nWire Current: \n\n")
-current_slider = slider(min=0, max=5, value=0, step = 1, length=220, bind=current_slider_change , right=15)
-wtext(text=f"\n Bound: \n\n")
-bound_slider = slider(min=1, max=5, value=3, step = 1, length=220, bind=angular_velocity_bound , right=15)
-wtext(text="\n\n")
 
+wtext(text=f"\n Bound: {angular_velocity_bound}\n\n")
+bound_slider = slider(min=1, max=5, value=3, step = 1, length=220, bind=angular_velocity_bound , right=15)
+wtext(text="\n Voltage: \n")
+voltage_slider = slider(min=0, max=15, value=0, step = 1, length=220, bind=voltage_slider_change, right=15)
+wtext(text=f"\n Resistance: \n")
+resistance_slider = slider(min=1, max=1500, value=0, step = 1, length=220, bind=resistance_slide_change, right=15)
+
+wtext(text="\n\n")
 # Create the button to change the direction of current
 clrbtn = button(bind=current_direction_button_change, text='Click to change direction of current!', background=color.white)
 # Create the button to show/hide the magnetic 
@@ -241,7 +248,7 @@ def getMagneticField():
     return magnetic_field * vec(-1, 0, 0) 
 
 def getNetMagneticField(omega):
-    print(f'inducedB: {inducedB(omega)}')
+    # print(f'inducedB: {inducedB(omega)}')
     return (magnetic_field  - inducedB(omega)) * vec(-1, 0, 0)
 
 def getWireLength():
@@ -258,7 +265,7 @@ def getBackEMF(omega):
     area = plane_width * plane_length
     # this is in radians
     angle =  getAngle()
-    print(f"omega: {omega}")
+    # print(f"omega: {omega}")
     return magnetic_field * area * mag(omega) * cos(angle)
 
 def inducedB(omega):
@@ -280,7 +287,7 @@ def getTorque():
 
 def getNetTorque(omega): 
 
-    print(f"net bfield: {getNetMagneticField(omega)}")
+    # print(f"net bfield: {getNetMagneticField(omega)}")
     force = getCurrent() * cross(getWireLength(),  getNetMagneticField(omega))
     r = carved_sections[0].pos
     # box0 = carved_sections[0]
@@ -302,15 +309,17 @@ def signum(x):
 degree_angle_list = []
 angular_velocity_bound = 3
 
-angular_velocity_original = vec(0, 0, 0)
-
 
 # why is omega in the z direction :skull:
 
 while True:
-    rate(500)
+    rate(1/dt)
 
     # print(f'Current Direction Vector : {current_direction}')
+    current = battery_emf / resistance
+    print(f"resistance {resistance}")
+    print(f"voltage {battery_emf}")
+    print(f"current {current}")
     
     curr_angle = degrees(atan2(carved_sections[2].pos.y, carved_sections[2].pos.x ))
     degree_angle_list.append(curr_angle)
@@ -323,30 +332,27 @@ while True:
 
     # it's in the z direction bc torque is the axis
 
-    torque = getNetTorque(angular_velocity)
+    # torque = getNetTorque(angular_velocity)
+    torque = getTorque()
     
     # Calculate Angular Acceleration
     angular_acceleration = torque/moment_of_inertia
 
-    print(f"net torque: {getNetTorque(angular_velocity)}")
-    print(f"torque {getTorque()}")
-    print(f"diff {getNetTorque(angular_velocity) - getTorque()}")
+    # print(f"net torque: {getNetTorque(angular_velocity)}")
+    # print(f"torque {getTorque()}")
+    # print(f"diff {getNetTorque(angular_velocity) - getTorque()}")
 
 
     # Update Angular Velocity
     angular_velocity += angular_acceleration * dt
-    if(angular_velocity.z < 0):
-        angular_velocity.z = max(angular_velocity.z, -angular_velocity_bound)
-    else:
-        angular_velocity.z = min(angular_velocity.z, angular_velocity_bound)
+    # if(angular_velocity.z < 0):
+    #     angular_velocity.z = max(angular_velocity.z, -angular_velocity_bound)
+    # else:
+    #     angular_velocity.z = min(angular_velocity.z, angular_velocity_bound)
     
     kDots.plot(t, angular_velocity.z)
     emfDots.plot(t, getBackEMF(angular_velocity))
     pDots.plot(t, getPower(angular_velocity))
-
-    torque2 = getTorque()
-    angular_acceleration2 = torque2 / moment_of_inertia
-    angular_velocity_original += angular_acceleration2 * dt
     
     # print(angular_velocity_original - angular_velocity)
     # print(f"magnetic field: {getMagneticField()}")
