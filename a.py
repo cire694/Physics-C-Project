@@ -2,7 +2,7 @@ from vpython import *
 
 # Create the scene
 scene = canvas(title='3D Stator Magnets', width=800, height=600, center=vector(0,0,0), background=color.white)
-
+scene.userzoom = False
 # Parameters for the stator
 num_magnets = 8 # Number of magnets in the stator
 radius = 5       # Radius of the stator
@@ -143,7 +143,15 @@ def magnetic_field_button_change(button):
         line.visible = not (line.visible)
 
 def reset_button():
-    return
+    global battery_emf
+    battery_emf = 0
+    global resistance
+    resistance = 1
+    global angular_velocity
+    angular_velocity = vec(0, 0, 0)
+
+
+    
 
 
 # Creating the sliders
@@ -151,7 +159,7 @@ wtext(text = "\nStrength of Magnetic Field: \n")
 magnetic_field_slider = slider(min=0, max=10, value=0, step = 1, length=220, bind=magnetic_field_slider_change, right=15)
 
 wtext(text=f"\n Bound: {angular_velocity_bound}\n\n")
-bound_slider = slider(min=1, max=5, value=3, step = 1, length=220, bind=angular_velocity_bound , right=15)
+bound_slider = slider(min=1, max=10, value=3, step = 1, length=220, bind=angular_velocity_bound , right=15)
 wtext(text="\n Voltage: \n")
 voltage_slider = slider(min=0, max=15, value=0, step = 1, length=220, bind=voltage_slider_change, right=15)
 wtext(text=f"\n Resistance: \n")
@@ -345,10 +353,10 @@ while True:
 
     # Update Angular Velocity
     angular_velocity += angular_acceleration * dt
-    # if(angular_velocity.z < 0):
-    #     angular_velocity.z = max(angular_velocity.z, -angular_velocity_bound)
-    # else:
-    #     angular_velocity.z = min(angular_velocity.z, angular_velocity_bound)
+    if(angular_velocity.z < 0):
+        angular_velocity.z = max(angular_velocity.z, -angular_velocity_bound)
+    else:
+        angular_velocity.z = min(angular_velocity.z, angular_velocity_bound)
     
     kDots.plot(t, angular_velocity.z)
     emfDots.plot(t, getBackEMF(angular_velocity))
