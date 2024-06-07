@@ -91,8 +91,8 @@ left_brush = box(pos = vector(-plane_length/8 - brush_length/2, 0 , plane_width)
 # Creating the induced fields from the wire loop
 induced_fields = []
 scale = 0.85
-top_plane = box(pos=vector(0,plane_thickness,0), length=plane_length*scale, height=plane_thickness*scale, width=plane_width * scale, color=color.blue)
-bottom_plane = box(pos=vector(0,-plane_thickness,0), length=plane_length*scale, height=plane_thickness * scale, width=plane_width * scale, color=color.red)
+top_plane = box(pos=vector(0,plane_thickness,0), length=plane_length*scale, height=plane_thickness*scale, width=plane_width * scale, color=color.red)
+bottom_plane = box(pos=vector(0,-plane_thickness,0), length=plane_length*scale, height=plane_thickness * scale, width=plane_width * scale, color=color.blue)
 induced_fields.append(top_plane)
 induced_fields.append(bottom_plane)
 
