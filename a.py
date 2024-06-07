@@ -105,7 +105,7 @@ angular_velocity = vector(0,0,0) # initial angular veclocity
 moment_of_inertia = (1/12) * (plane_length ** 2 + plane_width ** 2) # MOI for Rectangle
 
 #Parameters for Time
-dt = 0.001
+dt = 0.01
 t = 0
 
 # Angle between each magnet
@@ -317,9 +317,9 @@ while True:
 
     # print(f'Current Direction Vector : {current_direction}')
     current = battery_emf / resistance
-    print(f"resistance {resistance}")
-    print(f"voltage {battery_emf}")
-    print(f"current {current}")
+    # print(f"resistance {resistance}")
+    # print(f"voltage {battery_emf}")
+    # print(f"current {current}")
     
     curr_angle = degrees(atan2(carved_sections[2].pos.y, carved_sections[2].pos.x ))
     degree_angle_list.append(curr_angle)
