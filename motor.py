@@ -12,7 +12,6 @@ magnet_width = 0.25
 magnet_height = 5  
 angle_offset = pi/4 
 magnetic_field = 0.1
-angular_velocity_bound = 40
 resistance = 1
 battery_emf = 0
 current = battery_emf / resistance
@@ -187,18 +186,10 @@ def magnetic_field_slider_change(slider):
     magnetic_field = slider.value
     magnetic_field_text.text = f"Magnetic Field: {magnetic_field} T\n"
 
-def angular_velocity_bound_slider_change(slider):
-    global angular_velocity_bound
-    angular_velocity_bound = slider.value
-    angular_velocity_bound_text.text = f"Angular Velocity Bound: {angular_velocity_bound} rad/s\n"
-
 
 # Creating the sliders
 wtext(text = "\nStrength of Magnetic Field: \n")
 magnetic_field_slider = slider(min=0, max=0.1, value=0, step = 0.001, length=220, bind=magnetic_field_slider_change, right=15)
-
-wtext(text=f"\n Bound: \n\n")
-bound_slider = slider(min=1, max=60, value=3, step = 1, length=220, bind=angular_velocity_bound , right=15)
 wtext(text="\n Voltage: \n")
 voltage_slider = slider(min=0, max=15, value=0, step = 1, length=220, bind=voltage_slider_change, right=15)
 wtext(text=f"\n Resistance: \n")
@@ -257,7 +248,6 @@ wtext(text="\n\n")
 battery_emf_text = wtext(text=f"Battery EMF: {battery_emf} V\n")
 resistance_text = wtext(text=f"Resistance: {resistance} Ohms\n")
 magnetic_field_text = wtext(text=f"Magnetic Field: {magnetic_field} T\n")
-angular_velocity_bound_text = wtext(text=f"Angular Velocity Bound: {angular_velocity_bound} rad/s\n")
 
 
 
@@ -277,14 +267,13 @@ def magnetic_field_button_change(button):
         line.visible = not (line.visible)
 
 def reset_button():
-    global battery_emf, resistance, angular_velocity, t, angular_velocity_bound, magnetic_field, current_direction
+    global battery_emf, resistance, angular_velocity, t, magnetic_field, current_direction
     
     # Reset parameters
     battery_emf = 0
     resistance = 1
     angular_velocity = vec(0, 0, 0)
     t = 0
-    angular_velocity_bound = 40
     magnetic_field = 0.1
     current_direction = 1
     
@@ -292,7 +281,6 @@ def reset_button():
     voltage_slider.value = battery_emf
     resistance_slider.value = resistance
     magnetic_field_slider.value = magnetic_field
-    bound_slider.value = angular_velocity_bound
 
     # Delete existing armature sections
     for section in armature_sections:
@@ -414,10 +402,6 @@ while True:
 
     # Update Angular Velocity
     angular_velocity += angular_acceleration * dt
-    if(angular_velocity.z < 0):
-        angular_velocity.z = max(angular_velocity.z, -angular_velocity_bound)
-    else:
-        angular_velocity.z = min(angular_velocity.z, angular_velocity_bound)
     
     kDots.plot(t, angular_velocity.z)
     emfDots.plot(t, getBackEMF(angular_velocity))
