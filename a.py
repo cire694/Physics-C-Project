@@ -59,7 +59,7 @@ circuit_perimeter = [
     # vector(plane_length/)
 ]
 
-# Create boxes coneecting the armature position vectors
+# Create boxes conecting the armature position vectors
 carved_sections = []
 for i in range(len(armature_perimeter) - 1):
     if i == 5:
@@ -142,13 +142,8 @@ def magnetic_field_button_change(button):
     for line in magnetic_field_arrows:
         line.visible = not (line.visible)
 
-def reset_button():
-    global battery_emf
-    battery_emf = 0
-    global resistance
-    resistance = 1
-    global angular_velocity
-    angular_velocity = vec(0, 0, 0)
+
+
 
 
     
@@ -172,6 +167,103 @@ clrbtn = button(bind=current_direction_button_change, text='Click to change dire
 wtext(text="\n\n")
 magneticFieldButton = button(bind = magnetic_field_button_change, text = "Click to show/hide magnetic field", background = color.white)
 wtext(text="\n\n")
+
+def reset_button():
+    global battery_emf, resistance, angular_velocity, t, angular_velocity_bound, magnetic_field, current_direction
+    
+    # Reset parameters
+    battery_emf = 0
+    resistance = 1
+    angular_velocity = vec(0, 0, 0)
+    t = 0
+    angular_velocity_bound = 3
+    magnetic_field = 0.1
+    current_direction = 1
+    
+    # Reset sliders
+    voltage_slider.value = battery_emf
+    resistance_slider.value = resistance
+    magnetic_field_slider.value = magnetic_field
+    bound_slider.value = angular_velocity_bound
+
+    # Delete existing armature sections
+    for section in armature_sections:
+        section.visible = False
+    armature_sections.clear()
+
+    for section in carved_sections:
+        section.visible = False
+    carved_sections.clear()
+    
+    for piece in com_pieces:
+        piece.visible = False
+    com_pieces.clear()
+
+    for field in induced_fields:
+        field.visible = False
+    induced_fields.clear()
+
+    # Recreate armature sections
+    for i in range(len(circuit_perimeter) - 1):
+        section_length = mag(circuit_perimeter[i] - circuit_perimeter[i+1])
+        section_center = (circuit_perimeter[i] + circuit_perimeter[i+1]) / 2
+        section_direction = norm(circuit_perimeter[i+1] - circuit_perimeter[i])
+        section = box(pos=section_center, length=section_length, height=plane_thickness, width=plane_thickness, axis=section_direction, color=color.yellow)
+        armature_sections.append(section)
+    
+    # Recreate carved sections
+    for i in range(len(armature_perimeter) - 1):
+        if i == 5:
+            continue
+        section_length = mag(armature_perimeter[i] - armature_perimeter[i+1])
+        section_center = (armature_perimeter[i] + armature_perimeter[i+1]) / 2
+        section_direction = norm(armature_perimeter[i+1] - armature_perimeter[i])
+        section = box(pos=section_center, length=section_length, height=plane_thickness, width=plane_thickness, axis=section_direction, color=color.yellow)
+        carved_sections.append(section)
+
+    # Recreate commutator pieces
+    for i in range(pieces):
+        if (i == pieces / 4 or i == pieces * 3 / 4):
+            continue
+        angle = i * 2 * pi / pieces
+        x = com_radius * cos(angle)
+        y = com_radius * sin(angle)
+        position = vector(x, y, plane_width)
+        rotation_angle = angle + pi / 2
+        com = box(pos=position, size=vector(com_length, com_width, com_height), color=color.orange)
+        com.rotate(angle=rotation_angle, axis=vector(0, 0, 1))
+        com_pieces.append(com)
+
+    # Recreate induced fields
+    scale = 0.85
+    top_plane = box(pos=vector(0, plane_thickness, 0), length=plane_length * scale, height=plane_thickness * scale, width=plane_width * scale, color=color.red)
+    bottom_plane = box(pos=vector(0, -plane_thickness, 0), length=plane_length * scale, height=plane_thickness * scale, width=plane_width * scale, color=color.blue)
+    induced_fields.append(top_plane)
+    induced_fields.append(bottom_plane)
+
+    # Reset brushes
+    right_brush.pos = vector(plane_length / 8 + brush_length / 2, 0, plane_width)
+    left_brush.pos = vector(-plane_length / 8 - brush_length / 2, 0, plane_width)
+
+    global angular_velocity_graph, kDots, back_emf_graph, emfDots, power_graph, pDots
+    
+    # Create new graphs and gdots objects
+    angular_velocity_graph.delete()
+    back_emf_graph.delete()
+    power_graph.delete()
+    kDots.delete()
+    emfDots.delete()
+    pDots.delete()
+
+    angular_velocity_graph = graph(width=350, height=250, xtitle="Time", ytitle="Angular Velocity", align='left', scroll=True, xmin=0, xmax=5)
+    kDots = gdots(color=color.red, graph=angular_velocity_graph)
+
+    back_emf_graph = graph(width=350, height=250, xtitle="Time", ytitle="Back EMF", align='left', scroll=True, xmin=0, xmax=5)
+    emfDots = gdots(color=color.blue, graph=back_emf_graph)
+
+    power_graph = graph(width=350, height=250, xtitle="Time", ytitle="Power", align='left', scroll=True, xmin=0, xmax=5)
+    pDots = gdots(color=color.green, graph=power_graph)
+
 resetbutton = button(bind = reset_button, text = "Reset Simulation" , background = color.white )
 wtext(text="\n\n")
 
@@ -250,7 +342,6 @@ for i in range(pieces):
     com = box(pos = position, size = vector(com_length, com_width, com_height), color = color.orange)
     com.rotate(angle=rotation_angle, axis = vector(0,0,1))
     com_pieces.append(com)
-
 
 def getMagneticField():
     return magnetic_field * vec(-1, 0, 0) 
@@ -381,3 +472,4 @@ while True:
     # Update Time
     t += dt
 
+# note to self: why doesn't the backemf cause the motor to stop?
