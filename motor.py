@@ -12,7 +12,7 @@ magnet_width = 0.25
 magnet_height = 5  
 angle_offset = pi/4 
 magnetic_field = 0.1
-angular_velocity_bound = 15
+angular_velocity_bound = 40
 resistance = 1
 battery_emf = 0
 current = battery_emf / resistance
@@ -176,14 +176,11 @@ def voltage_slider_change(slider):
     global battery_emf
     battery_emf = slider.value
     battery_emf_text.text = f"Battery EMF: {battery_emf} V\n"
-    current_text.text = f"Current: {current}\n"
-    net_emf_text = f"net EMF: {battery_emf - getBackEMF(angular_velocity)}"
 
 def resistance_slide_change(slider):
     global resistance
     resistance = slider.value
     resistance_text.text = f"Resistance: {resistance} Ohms\n"
-    current_text.text = f"Current: {current}\n"
 
 def magnetic_field_slider_change(slider):
     global magnetic_field
@@ -198,10 +195,10 @@ def angular_velocity_bound_slider_change(slider):
 
 # Creating the sliders
 wtext(text = "\nStrength of Magnetic Field: \n")
-magnetic_field_slider = slider(min=0, max=10, value=0, step = 1, length=220, bind=magnetic_field_slider_change, right=15)
+magnetic_field_slider = slider(min=0, max=0.1, value=0, step = 0.001, length=220, bind=magnetic_field_slider_change, right=15)
 
 wtext(text=f"\n Bound: \n\n")
-bound_slider = slider(min=1, max=10, value=3, step = 1, length=220, bind=angular_velocity_bound , right=15)
+bound_slider = slider(min=1, max=60, value=3, step = 1, length=220, bind=angular_velocity_bound , right=15)
 wtext(text="\n Voltage: \n")
 voltage_slider = slider(min=0, max=15, value=0, step = 1, length=220, bind=voltage_slider_change, right=15)
 wtext(text=f"\n Resistance: \n")
@@ -256,12 +253,12 @@ def signum(x):
 ################################################################################################
 # texts:
 
+wtext(text="\n\n")
 battery_emf_text = wtext(text=f"Battery EMF: {battery_emf} V\n")
 resistance_text = wtext(text=f"Resistance: {resistance} Ohms\n")
 magnetic_field_text = wtext(text=f"Magnetic Field: {magnetic_field} T\n")
 angular_velocity_bound_text = wtext(text=f"Angular Velocity Bound: {angular_velocity_bound} rad/s\n")
-current_text = wtext(text=f"current: {current} amps\n")
-net_emf_text = wtext(text=f"net EMf: {battery_emf - getBackEMF(angular_velocity)}\n")
+
 
 
 ################################################################################################
@@ -287,7 +284,7 @@ def reset_button():
     resistance = 1
     angular_velocity = vec(0, 0, 0)
     t = 0
-    angular_velocity_bound = 3
+    angular_velocity_bound = 40
     magnetic_field = 0.1
     current_direction = 1
     
@@ -376,9 +373,6 @@ def reset_button():
     pDots = gdots(color=color.green, graph=power_graph)
 
 
-resetbutton = button(bind = reset_button, text = "Reset Simulation" , background = color.white )
-wtext(text="\n\n")
-
 wtext(text="\n\n")
 clrbtn = button(bind=current_direction_button_change, text='Click to change direction of current!', background=color.white)
 wtext(text="\n\n")
@@ -405,7 +399,8 @@ pDots = gdots(color=color.green, graph=power_graph)
 while True:
     rate(1/dt)
 
-    current = battery_emf / resistance
+
+    current = (battery_emf - (abs(getBackEMF(angular_velocity)) * signum(battery_emf))) / resistance
 
     curr_angle = degrees(atan2(carved_sections[2].pos.y, carved_sections[2].pos.x ))
     degree_angle_list.append(curr_angle)
@@ -439,7 +434,12 @@ while True:
         piece.rotate(angle = mag(angular_velocity) * signum(angular_velocity.z)*  dt, axis= vector(0,0,1),origin=vec(0, 0, 0))
 
     # debugging: 
-    # print(f"torque {torque}")
+    # print(f"current: {current}")
+    # print(f"getCurrent {getCurrent()}")
+    # print(f"battery emf : {battery_emf}")
+    # print(f"backemf: {abs(getBackEMF(angular_velocity))}")
+    # print(f"angular Velocity: {angular_velocity}")
+    # print(f"net voltage: {abs(battery_emf - (abs(getBackEMF(angular_velocity)) * signum(battery_emf)))}")
     # print(angular_acceleration)
     # print(angular_velocity_original - angular_velocity)
     # print(f"magnetic field: {getMagneticField()}")
@@ -449,4 +449,6 @@ while True:
 
     t += dt
 
+# create a netemf graph
+# create a net current graph
 # note to self: why doesn't the backemf cause the motor to stop?
