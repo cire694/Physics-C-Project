@@ -11,7 +11,7 @@ magnet_length = 2
 magnet_width = 0.25
 magnet_height = 5  
 angle_offset = pi/4 
-magnetic_field = 0.1
+magnetic_field = 0.01
 resistance = 1
 battery_emf = 0
 current = battery_emf / resistance
@@ -196,7 +196,6 @@ wtext(text=f"\n Resistance: \n")
 resistance_slider = slider(min=1, max=10, value=0, step = 1, length=220, bind=resistance_slide_change, right=15)
 
 
-
 ################################################################################################
 # physics: 
 def getMagneticField():
@@ -276,6 +275,7 @@ def reset_button():
     t = 0
     magnetic_field = 0.1
     current_direction = 1
+    magnetic_field = 0.01
     
     # Reset sliders
     voltage_slider.value = battery_emf
