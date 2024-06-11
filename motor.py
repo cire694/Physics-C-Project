@@ -76,7 +76,6 @@ for i in range(len(armature_perimeter) - 1):
     section_direction = norm(armature_perimeter[i+1] - armature_perimeter[i])
     section = box(pos=section_center, length=section_length, height=plane_thickness, width=plane_thickness, axis=section_direction, color=color.yellow)
     carved_sections.append(section)
-#
 
 armature_sections = []
 for i in range (len(circuit_perimeter) - 1):
