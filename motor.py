@@ -278,7 +278,7 @@ def reset_button():
     t = 0
     magnetic_field = 0.1
     current_direction = 1
-    magnetic_field = 0.01
+    magnetic_field = 0
     
     # Reset sliders
     voltage_slider.value = battery_emf
