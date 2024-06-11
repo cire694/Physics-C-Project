@@ -1,7 +1,7 @@
 from vpython import *
 
 # creating the scene
-scene = canvas(title='3D Stator Magnets', width=800, height=600, center=vector(0,0,0), background=color.white)
+scene = canvas(title='3D Stator Magnets', width=800, height=600, center=vector(0,0,0), background=color.white, align = 'left')
 scene.userzoom = False
 
 # motor configurations
@@ -177,25 +177,25 @@ for i in range(pieces):
 def voltage_slider_change(slider):
     global battery_emf
     battery_emf = slider.value
-    battery_emf_text.text = f"Battery EMF: {battery_emf} V\n"
+    battery_emf_text.text = f"\tBattery EMF: {battery_emf} V\n"
 
 def resistance_slide_change(slider):
     global resistance
     resistance = slider.value
-    resistance_text.text = f"Resistance: {resistance} Ohms\n"
+    resistance_text.text = f"\tResistance: {resistance} Ohms\n"
 
 def magnetic_field_slider_change(slider):
     global magnetic_field
     magnetic_field = slider.value
-    magnetic_field_text.text = f"Magnetic Field: {magnetic_field} T\n"
+    magnetic_field_text.text = f"\tMagnetic Field: {magnetic_field} T\n"
 
 
 # Creating the sliders
-wtext(text = "\nStrength of Magnetic Field: \n")
+wtext(text = "\n\t Strength of Magnetic Field: \n\t")
 magnetic_field_slider = slider(min=0, max=0.1, value=0, step = 0.001, length=220, bind=magnetic_field_slider_change, right=15)
-wtext(text="\n Voltage: \n")
+wtext(text="\n\n\t Voltage: \n\t")
 voltage_slider = slider(min=0, max=15, value=0, step = 1, length=220, bind=voltage_slider_change, right=15)
-wtext(text=f"\n Resistance: \n")
+wtext(text=f"\n\n\t Resistance: \n\t")
 resistance_slider = slider(min=1, max=10, value=0, step = 1, length=220, bind=resistance_slide_change, right=15)
 
 
@@ -247,9 +247,9 @@ def signum(x):
 # texts:
 
 wtext(text="\n\n")
-battery_emf_text = wtext(text=f"Battery EMF: {battery_emf} V\n")
-resistance_text = wtext(text=f"Resistance: {resistance} Ohms\n")
-magnetic_field_text = wtext(text=f"Magnetic Field: {magnetic_field} T\n")
+battery_emf_text = wtext(text=f"\tBattery EMF: {battery_emf} V\n")
+resistance_text = wtext(text=f"\tResistance: {resistance} Ohms\n")
+magnetic_field_text = wtext(text=f"\tMagnetic Field: {magnetic_field} T\n")
 
 
 
@@ -344,7 +344,7 @@ def reset_button():
     right_brush.pos = vector(plane_length / 8 + brush_length / 2, 0, plane_width)
     left_brush.pos = vector(-plane_length / 8 - brush_length / 2, 0, plane_width)
 
-    global angular_velocity_graph, kDots, back_emf_graph, emfDots, power_graph, pDots
+    global angular_velocity_graph, kDots, back_emf_graph, emfDots, power_graph, pDots, current_graph, cDots
     
     # Create new graphs and gdots objects
     angular_velocity_graph.delete()
@@ -357,10 +357,10 @@ def reset_button():
     cDots.delete()
 
 
-    angular_velocity_graph = graph(width=350, height=250, xtitle="Time", ytitle="Angular Velocity", align='left', scroll=True, xmin=0, xmax=5)
-    kDots = gdots(color=color.red, graph=angular_velocity_graph)
+    angular_velocity_graph = graph(width=350, height=250, xtitle=("Time"), ytitle=("Angular Velocity"), align='left', scroll=True, xmin=0, xmax=5)
+    kDots=gdots(color=color.red, graph=angular_velocity_graph)
 
-    back_emf_graph = graph(width=350, height=250, xtitle="Time", ytitle="Back EMF", align='left', scroll=True, xmin=0, xmax=5)
+    back_emf_graph = graph(width=350, height=250, xtitle=("Time"), ytitle=("Back EMF"), align='left', scroll=True, xmin=0, xmax=5)
     emfDots = gdots(color=color.blue, graph=back_emf_graph)
 
     power_graph = graph(width=350, height=250, xtitle="Time", ytitle="Power", align='left', scroll=True, xmin=0, xmax=5)
@@ -373,15 +373,16 @@ def reset_button():
 
 
 
-wtext(text="\n\n")
+wtext(text="\n\n\t")
 clrbtn = button(bind=current_direction_button_change, text='Click to change direction of current!', background=color.white)
-wtext(text="\n\n")
+wtext(text="\n\n\t")
 
 magneticFieldButton = button(bind = magnetic_field_button_change, text = "Click to show/hide magnetic field", background = color.white)
-wtext(text="\n\n")
+wtext(text="\n\n\t")
 
 resetbutton = button(bind = reset_button, text = "Reset Simulation" , background = color.white )
-wtext(text="\n\n")
+wtext(text="\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+
 
 ################################################################################################
 # graphs: 
