@@ -350,6 +350,9 @@ def reset_button():
     kDots.delete()
     emfDots.delete()
     pDots.delete()
+    current_graph.delete()
+    cDots.delete()
+
 
     angular_velocity_graph = graph(width=350, height=250, xtitle="Time", ytitle="Angular Velocity", align='left', scroll=True, xmin=0, xmax=5)
     kDots = gdots(color=color.red, graph=angular_velocity_graph)
@@ -359,6 +362,12 @@ def reset_button():
 
     power_graph = graph(width=350, height=250, xtitle="Time", ytitle="Power", align='left', scroll=True, xmin=0, xmax=5)
     pDots = gdots(color=color.green, graph=power_graph)
+
+    current_graph = graph(width=350, height=250, xtitle="Time", ytitle="Current", align='left', scroll=True, xmin=0, xmax=5)
+    cDots = gdots(color=color.purple, graph=current_graph)
+
+
+
 
 
 wtext(text="\n\n")
@@ -381,6 +390,9 @@ emfDots = gdots(color=color.blue, graph=back_emf_graph)
 
 power_graph = graph(width=350, height=250, xtitle="Time", ytitle="Power", align='left', scroll=True, xmin=0, xmax=5)
 pDots = gdots(color=color.green, graph=power_graph)
+
+current_graph = graph(width=350, height=250, xtitle="Time", ytitle="Current", align='left', scroll=True, xmin=0, xmax=5)
+cDots = gdots(color=color.purple, graph=current_graph)
 
 ################################################################################################
 # while loop
@@ -406,6 +418,7 @@ while True:
     kDots.plot(t, angular_velocity.z)
     emfDots.plot(t, getBackEMF(angular_velocity))
     pDots.plot(t, getPower(angular_velocity))
+    cDots.plot(t, current)
     
     # Update wire rotation
     for boxi in carved_sections:
