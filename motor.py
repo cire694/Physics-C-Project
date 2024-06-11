@@ -63,6 +63,9 @@ circuit_perimeter = [
     vector(-plane_length/8, 0, plane_width)
 ]
 
+battery = box(pos = vector(0,0, 1.5 * plane_width), length = 1, height = 0.5, width = 0.5, color = color.orange)
+batter2 = box(pos = vector(0.75, 0, 1.5 * plane_width), length = 0.5 , height = 0.5, width = 0.5, color = color.black)
+
 # Create boxes conecting the armature position vectors
 carved_sections = []
 for i in range(len(armature_perimeter) - 1):
